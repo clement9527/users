@@ -1,9 +1,8 @@
 var mongoose = require('mongoose');
-var user = new mongoose.Schema({
-    id: ObjectId,
+var userSchema = new mongoose.Schema({
     userName: String,
     givenName: String,
     surName: String,
     DOB: Date
 });
-module.exports = mongoose.model('user', user);
+module.exports = mongoose.model('user', userSchema);
