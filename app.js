@@ -4,12 +4,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var routes = require('./routes/index');
 var users = require('./routes/users');
+var config = require('./config/config');
 
 var mongoose = require('mongoose');
-var db = mongoose.connect(
-    'mongodb://localhost/user',
+mongoose.connect(
+    config.db.dev,
     function(err) {
         if (err) {
             console.log('connection error', err);
@@ -32,8 +32,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
+var handlers = {
+    users: require('./handlers/users')
+};
+users.setup(app, handlers);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -43,7 +45,6 @@ app.use(function(req, res, next) {
 });
 
 // error handlers
-
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
