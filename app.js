@@ -4,19 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var config = require('./config/config');
+//var config = require('./config/config');
 
-var mongoose = require('mongoose');
-mongoose.connect(
-    config.db.dev,
-    function(err) {
-        if (err) {
-            console.log('connection error', err);
-        } else {
-            console.log('connection successful');
-        }
-    }
-);
+//var mongoose = require('mongoose');
 
 var app = express();
 
@@ -32,9 +22,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-var routes = require('./routes/index');
+//var routes = require('./routes/index');
 var users = require('./routes/users');
-app.use('/', routes);
+//app.use('/', routes);
 app.use('/users', users);
 //var handlers = {
 //    users: require('./handlers/users')
@@ -64,13 +54,16 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.render('error', {
         message: err.message,
         error: {}
     });
 });
+//
+module.exports.start = function() {
+    app.listen(process.env.PORT || 3000);
+};
 
-
-module.exports = app;
+//module.exports = app;

@@ -30,11 +30,5 @@ var schema = new mongoose.Schema({
     }
 );
 schema.plugin(uniqueValidator, { message: "Error: user with specified user name already exists" });
-
 var User = mongoose.model('user', schema);
-
-module.exports.create = User.create.bind(User);
-module.exports.find = User.find.bind(User);
-module.exports.findById = User.findById.bind(User);
-module.exports.findByIdAndUpdate = User.findByIdAndUpdate.bind(User);
-module.exports.delete = User.delete;
+module.exports = User;

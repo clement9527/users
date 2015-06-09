@@ -1,20 +1,18 @@
-var should = require('should');
-var assert = require('assert');
-var request = require('supertest');
+'use strict';
 var mongoose = require('mongoose');
-var config = require('../config/config');
-var user = require('../models/users');
-var app = require('../app');
+var should = require('should');
+var request = require('supertest');
+var app  = require('../app');
+var config = require('../config/config-test');
+var User = require('../models/users');
+
+mongoose.connect(config.db);
+app.start();
 
 describe('routes', function() {
-    //before(function(done) {
-    //    mongoose.connect(config.db.test);
-    //    done();
-    //});
-
     var url = 'http://localhost:3000';
-    describe('users', function() {
-        it('add user with identified user name should succeed', function(done) {
+    describe('POST /users', function() {
+        it('add user with identified user name should pass', function(done) {
             var user = {
                 userName: 'theUserName',
                 givenName: 'theGivenName',
@@ -24,48 +22,103 @@ describe('routes', function() {
             request(url)
                 .post('/users')
                 .send(user)
+                .expect(200)
                 .end(function(err, res) {
-                    if (err) {
-                        //console.log(err.response.error);
-                        throw err;
-                    }
-                    //should.not.exist(err);
-                    //res.status.should.eql(200);
-                    //res.body.should.have.property('_id');
-                    //res.body.should.have.property('userName');
-                    //res.body.should.have.property('givenName');
-                    //res.body.should.have.property('surName');
+                    res.body.should.have.property('userName', 'theUserName');
+                    res.body.should.have.property('givenName', 'theGivenName');
+                    res.body.should.have.property('surName', 'theSurName');
                     done();
                 });
         });
 
-        //it('add user with duplicated user name should fail', function(done) {
-        //    var user = {
-        //        userName: 'theUserName',
-        //        givenName: 'theGivenName',
-        //        surName: 'theSurName'
-        //    };
-        //
-        //    request(url)
-        //        .post('/users')
-        //        .send(user)
-        //        .end(function(err, res) {
-        //            should.not.exist(err);
-        //            res.status.should.eql(200);
-        //            request(url)
-        //                .post('/users')
-        //                .send(user)
-        //                .end(function(err, res) {
-        //                    should.not.exist(err);
-        //                    res.status.should.eql(200);
-        //                    done();
-        //                });
-        //        });
-        //});
+        it('add user with duplicated user name should fail', function(done) {
+            var user = {
+                userName: 'theUserName',
+                givenName: 'theGivenName',
+                surName: 'theSurName'
+            };
+
+            request(url)
+                .post('/users')
+                .send(user)
+                .expect(200)
+                .end(function(err, res) {
+                    request(url)
+                        .post('/users')
+                        .send(user)
+                        .end(function(err, res) {
+                            should.exist(err);
+                            res.status.should.eql(500);
+                            done();
+                        });
+                });
+        });
+
+        it ('add user without user name should fail', function(done) {
+            var user = {
+                givenName: 'theGivenName',
+                surName: 'theSurName'
+            };
+            request(url)
+                .post('/users')
+                .send(user)
+                .expect(500);
+            done();
+        });
+
+        it('add user with only user name should pass', function(done) {
+            var user = {
+                userName: 'theUserName'
+            };
+            request(url)
+                .post('/users')
+                .send(user)
+                .expect(200)
+                .end(function(err, res) {
+                    should.not.exist(err);
+                    res.body.should.have.property('userName', 'theUserName');
+                    res.body.should.not.have.property('givenName');
+                    res.body.should.not.have.property('surName');
+                    done();
+                });
+        });
     });
 
+    describe("GET /users", function() {
+        var user1 = new User({userName: 'theUserName1'});
+        var user2 = new User({userName: 'theUserName2'});
+
+        before(function(done){
+            user1.save();
+            user2.save();
+            done();
+        });
+
+        it ('find all should return all users', function(done) {
+            request(url)
+                .get('/users')
+                .expect(200)
+                .end(function(err, res){
+                    console.log(res.body);
+                });
+            done();
+        });
+    });
+
+
+    //describe("DELETE /users:id", function(){
+    //    it ("delete user does not exist", function(done) {
+    //        request(url)
+    //            .del('/users?id=someId')
+    //            .end(function(err, res){
+    //                should.exist(err);
+    //                res.status.should.eql(500);
+    //            });
+    //    });
+    //});
+
     afterEach(function(done) {
-        mongoose.connect(config.db.test, function() {
+        mongoose.connect(config.db, function() {
             mongoose.connection.db.dropDatabase();
         });
         done();
