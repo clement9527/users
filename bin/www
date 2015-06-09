@@ -5,26 +5,31 @@
  */
 
 var app = require('../app');
+var config = require('../config/config-dev');
 var debug = require('debug')('users:server');
 var http = require('http');
+var mongoose = require('mongoose');
+
+/**
+ * Connect to database
+ */
+mongoose.connect(config.db);
+debug("Successfully connected to mongoDB. Starting web server...");
 
 /**
  * Get port from environment and store in Express.
  */
-
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
-
 var server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
