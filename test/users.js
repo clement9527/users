@@ -12,7 +12,7 @@ app.listen(3000);
 describe('CRUD /users', function() {
     var url = 'http://localhost:3000';
 
-    describe("GET /users", function () {
+    describe("GET /users endpoint", function () {
         var user1 = new User({userName: 'theUserName1'});
         var user2 = new User({userName: 'theUserName2'});
 
@@ -26,7 +26,7 @@ describe('CRUD /users', function() {
             });
         });
 
-        it('find all users should return both users', function (done) {
+        it('GET /users will return all users', function (done) {
             request(url)
                     .get('/users')
                     .end(function (err, res) {
@@ -38,7 +38,7 @@ describe('CRUD /users', function() {
                          });
         });
 
-        it('find one user with id should return that user', function (done) {
+        it('GET /users:id with valid id will return status 200 and the user', function (done) {
             request(url)
                     .get('/users/' + user1._id)
                     .end(function (err, res) {
@@ -48,9 +48,9 @@ describe('CRUD /users', function() {
                          });
         });
 
-        it('find one user with non existing id should return empty', function (done) {
+        it('GET /users:id with invalid id will return status 500', function (done) {
             request(url)
-                    .get('/users/theIdThatNeverMatch')
+                    .get('/users/invalid_id')
                     .end(function (err, res) {
                              res.status.should.eql(500);
                              res.body.should.eql({});
@@ -59,7 +59,7 @@ describe('CRUD /users', function() {
         });
     });
 
-    describe('POST /users', function () {
+    describe('POST /users endpoint', function () {
         beforeEach(function (done) {
             User.collection.remove(function () {
                 var userModel = new User({userName: 'existingUserName'});
@@ -69,7 +69,7 @@ describe('CRUD /users', function() {
             });
         });
 
-        it('add user with identified user name should pass', function (done) {
+        it('POST /users with valid user will return status 200 and create that user', function (done) {
             var user = {
                 userName: 'theUserName',
                 givenName: 'theGivenName',
@@ -88,7 +88,7 @@ describe('CRUD /users', function() {
                          });
         });
 
-        it('add user with duplicated user name should fail', function (done) {
+        it('POST /users with duplicated username will return status 500', function (done) {
             var user = {
                 userName: 'existingUserName'
             };
@@ -102,7 +102,7 @@ describe('CRUD /users', function() {
                          });
         });
 
-        it('add user without user name should fail', function (done) {
+        it('POST /users with required field missing will return status 500', function (done) {
             var user = {
                 givenName: 'theGivenName',
                 surName: 'theSurName'
@@ -112,22 +112,6 @@ describe('CRUD /users', function() {
                     .send(user)
                     .end(function(err, res){
                              res.status.should.eql(500);
-                             done();
-                         });
-        });
-
-        it('add user with only user name should pass', function (done) {
-            var user = {
-                userName: 'theUserName'
-            };
-            request(url)
-                    .post('/users')
-                    .send(user)
-                    .end(function (err, res) {
-                             res.status.should.eql(200);
-                             res.body.should.have.property('userName', 'theUserName');
-                             res.body.should.not.have.property('givenName');
-                             res.body.should.not.have.property('surName');
                              done();
                          });
         });
@@ -144,7 +128,7 @@ describe('CRUD /users', function() {
             });
         });
 
-        it("delete user with id should delete the user", function (done) {
+        it("DELETE /users:id with valid id will return status 200 and delete that user", function (done) {
             request(url)
                     .delete('/users/' + user.id)
                     .end(function (err, res) {
@@ -157,9 +141,19 @@ describe('CRUD /users', function() {
                          });
 
         });
+
+        it("DELETE /users:id with invalid id will return status 500", function (done) {
+            request(url)
+                    .delete('/users/invalid_id')
+                    .end(function (err, res) {
+                             res.status.should.eql(500);
+                             done();
+                         });
+
+        });
     });
 
-    describe("PUT /users:id", function () {
+    describe("PUT /users:id endpoint", function () {
         var user = new User({userName: 'theUserName'});
 
         before(function (done) {
@@ -170,7 +164,7 @@ describe('CRUD /users', function() {
             });
         });
 
-        it("update user with a different name should update the user", function (done) {
+        it("PUT /users:id with different username will return status 200 and update the user", function (done) {
             user.userName = 'anotherUserName';
             request(url)
                     .put('/users/' + user.id)
@@ -183,6 +177,17 @@ describe('CRUD /users', function() {
                              });
                          });
 
+        });
+
+        it("PUT /users:id with invalid id will return status 500", function (done) {
+            user.userName = 'anotherUserName';
+            request(url)
+                    .put('/users/invalid_id')
+                    .send(user)
+                    .end(function (err, res) {
+                             res.status.should.eql(500);
+                             done();
+                         });
         });
     });
 
