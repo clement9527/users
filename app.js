@@ -1,3 +1,5 @@
+'use strict';
+var __logdir = './logs';
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -6,6 +8,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var fs = require('fs');
 
 var app = express();
 
@@ -15,7 +18,14 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
+
+/*
+ * Logging
+ */
+fs.existsSync(__logdir) || fs.mkdirSync(__logdir)
+var log = fs.createWriteStream(__logdir + '/access.log', {flags: 'w'});
+app.use(logger('tiny', {stream: log}));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -54,5 +64,4 @@ app.use(function (err, req, res) {
         error: {}
     });
 });
-
 module.exports = app;

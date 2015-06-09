@@ -27,7 +27,7 @@ var users = {
     },
 
     delete: function(req, res, next) {
-        User.delete(req.params.id, callback(res, next));
+        User.remove({_id: req.params.id}, callback(res, next));
     }
 };
 

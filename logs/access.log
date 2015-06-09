@@ -1,0 +1,9 @@
+GET /users 200 139 - 4.841 ms
+GET /users/5577771604b56f8946000001 200 68 - 2.160 ms
+GET /users/theIdThatNeverMatch 500 4242 - 119.744 ms
+POST /users 200 117 - 7.624 ms
+POST /users 500 1728 - 16.702 ms
+POST /users 500 873 - 6.863 ms
+POST /users 200 67 - 0.989 ms
+DELETE /users/5577771604b56f8946000003 200 1 - 0.710 ms
+PUT /users/5577771604b56f8946000004 200 71 - 2.210 ms
