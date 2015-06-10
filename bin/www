@@ -5,7 +5,7 @@
  */
 
 var app = require('../app');
-var config = require('../config/config-dev');
+var config = require('../configs/config-dev');
 var debug = require('debug')('users:server');
 var http = require('http');
 var mongoose = require('mongoose');
@@ -21,6 +21,7 @@ debug("Successfully connected to mongoDB. Starting web server...");
  */
 var port = normalizePort(process.env.PORT || config.port);
 app.set('port', port);
+app.set('secret', config.secret); // secret variable
 
 /**
  * Create HTTP server.

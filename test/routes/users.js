@@ -3,12 +3,13 @@ var mongoose = require('mongoose');
 var should = require('should');
 var request = require('supertest');
 var app  = require('../../app');
-var config = require('../../config/config-test');
+var config = require('../../configs/config-test');
 var User = require('../../models/users');
 
 var port = 3001;
-mongoose.connect(config.db);
+var connection = mongoose.createConnection(config.db);
 app.listen(config.port);
+app.set('secret', config.secret);
 var url = 'http://localhost:' + config.port;
 
 describe('CRUD /users', function() {
@@ -187,9 +188,8 @@ describe('CRUD /users', function() {
     });
 
     after(function (done) {
-        mongoose.connect(config.db, function () {
-            mongoose.connection.db.dropDatabase();
-        });
+        connection.db.dropDatabase();
+        connection.close();
         done();
     });
 });
