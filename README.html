@@ -1,0 +1,125 @@
+    <section class="suite">
+      <h1>CRUD /users</h1>
+      <dl>
+        <section class="suite">
+          <h1>GET /users</h1>
+          <dl>
+            <dt>GET /users will return all users</dt>
+            <dd><pre><code>//user1 and user2 are existing in database
+request(url)
+        .get('/users')
+        .end(function (err, res) {
+                 res.status.should.eql(200);
+                 res.body.should.have.length(2);
+                 res.body[0].should.have.property('userName', user1.userName);
+                 res.body[1].should.have.property('userName', user2.userName);
+                 done();
+             });</code></pre></dd>
+            <dt>GET /users:id with valid id will return status 200 and the user</dt>
+            <dd><pre><code>//user1 and user2 are existing in database
+request(url)
+        .get('/users/' + user1.id)
+        .end(function (err, res) {
+                 res.status.should.eql(200);
+                 res.body.should.have.property('userName', 'theUserName1');
+                 done();
+             });</code></pre></dd>
+            <dt>GET /users:id with invalid id will return status 500</dt>
+            <dd><pre><code>//user1 and user2 are existing in database
+request(url)
+        .get('/users/invalid_id')
+        .end(function (err, res) {
+                 res.status.should.eql(500);
+                 res.body.should.eql({});
+                 done();
+             });</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>POST /users</h1>
+          <dl>
+            <dt>POST /users with valid user will return status 200 and create that user</dt>
+            <dd><pre><code>var user = new User({userName: 'theUserName', givenName: 'theGivenName', surName: 'theSurName'});
+request(url)
+        .post('/users')
+        .send(user)
+        .end(function (err, res) {
+                 res.status.should.eql(200);
+                 res.body.should.have.property('userName', user.userName);
+                 res.body.should.have.property('givenName', user.givenName);
+                 res.body.should.have.property('surName', user.surName);
+                 done();
+             });</code></pre></dd>
+            <dt>POST /users with duplicated username will return status 500</dt>
+            <dd><pre><code>request(url)
+        .post('/users')
+        .send(new User({userName: 'existingUserName'}))
+        .end(function (err, res) {
+                 res.status.should.eql(500);
+                 done();
+             });</code></pre></dd>
+            <dt>POST /users with required field missing will return status 500</dt>
+            <dd><pre><code>var user = {
+    givenName: 'theGivenName',
+    surName: 'theSurName'
+};
+request(url)
+        .post('/users')
+        .send(user)
+        .end(function(err, res){
+                 res.status.should.eql(500);
+                 done();
+             });</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>DELETE /users:id</h1>
+          <dl>
+            <dt>DELETE /users:id with valid id will return status 200 and delete that user</dt>
+            <dd><pre><code>request(url)
+        .delete('/users/' + user.id)
+        .end(function (err, res) {
+                 res.status.should.eql(200);
+                 res.body.should.eql(1);
+                 User.findById(user.id, function (err, result) {
+                     should.not.exist(result);
+                     done();
+                 });
+             });</code></pre></dd>
+            <dt>DELETE /users:id with invalid id will return status 500</dt>
+            <dd><pre><code>request(url)
+        .delete('/users/invalid_id')
+        .end(function (err, res) {
+                 res.status.should.eql(500);
+                 done();
+             });</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>PUT /users:id</h1>
+          <dl>
+            <dt>PUT /users:id with different username will return status 200 and update the user</dt>
+            <dd><pre><code>user.userName = 'anotherUserName';
+request(url)
+        .put('/users/' + user.id)
+        .send(user)
+        .end(function (err, res) {
+                 res.status.should.eql(200);
+                 User.findById(user.id, function (err, result) {
+                     result.should.have.property('userName', 'anotherUserName');
+                     done();
+                 });
+             });</code></pre></dd>
+            <dt>PUT /users:id with invalid id will return status 500</dt>
+            <dd><pre><code>user.userName = 'anotherUserName';
+request(url)
+        .put('/users/invalid_id')
+        .send(user)
+        .end(function (err, res) {
+                 res.status.should.eql(500);
+                 done();
+             });</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>

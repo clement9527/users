@@ -6,13 +6,13 @@ var app  = require('../app');
 var config = require('../config/config-test');
 var User = require('../models/users');
 
+var port = 3001;
 mongoose.connect(config.db);
-app.listen(3000);
+app.listen(config.port);
+var url = 'http://localhost:' + config.port;
 
 describe('CRUD /users', function() {
-    var url = 'http://localhost:3000';
-
-    describe("GET /users endpoint", function () {
+    describe("GET /users", function () {
         var user1 = new User({userName: 'theUserName1'});
         var user2 = new User({userName: 'theUserName2'});
 
@@ -27,20 +27,22 @@ describe('CRUD /users', function() {
         });
 
         it('GET /users will return all users', function (done) {
+            //user1 and user2 are existing in database
             request(url)
                     .get('/users')
                     .end(function (err, res) {
                              res.status.should.eql(200);
                              res.body.should.have.length(2);
-                             res.body[0].should.have.property('userName', 'theUserName1');
-                             res.body[1].should.have.property('userName', 'theUserName2');
+                             res.body[0].should.have.property('userName', user1.userName);
+                             res.body[1].should.have.property('userName', user2.userName);
                              done();
                          });
         });
 
         it('GET /users:id with valid id will return status 200 and the user', function (done) {
+            //user1 and user2 are existing in database
             request(url)
-                    .get('/users/' + user1._id)
+                    .get('/users/' + user1.id)
                     .end(function (err, res) {
                              res.status.should.eql(200);
                              res.body.should.have.property('userName', 'theUserName1');
@@ -49,6 +51,7 @@ describe('CRUD /users', function() {
         });
 
         it('GET /users:id with invalid id will return status 500', function (done) {
+            //user1 and user2 are existing in database
             request(url)
                     .get('/users/invalid_id')
                     .end(function (err, res) {
@@ -59,43 +62,36 @@ describe('CRUD /users', function() {
         });
     });
 
-    describe('POST /users endpoint', function () {
+    describe('POST /users', function () {
+        var existingUser = {userName: 'existingUserName'};
+
         beforeEach(function (done) {
             User.collection.remove(function () {
-                var userModel = new User({userName: 'existingUserName'});
-                userModel.save(function () {
+                var userToCreate = new User(existingUser);
+                userToCreate.save(function () {
                     done();
                 });
             });
         });
 
         it('POST /users with valid user will return status 200 and create that user', function (done) {
-            var user = {
-                userName: 'theUserName',
-                givenName: 'theGivenName',
-                surName: 'theSurName'
-            };
-
+            var user = new User({userName: 'theUserName', givenName: 'theGivenName', surName: 'theSurName'});
             request(url)
                     .post('/users')
                     .send(user)
                     .end(function (err, res) {
                              res.status.should.eql(200);
-                             res.body.should.have.property('userName', 'theUserName');
-                             res.body.should.have.property('givenName', 'theGivenName');
-                             res.body.should.have.property('surName', 'theSurName');
+                             res.body.should.have.property('userName', user.userName);
+                             res.body.should.have.property('givenName', user.givenName);
+                             res.body.should.have.property('surName', user.surName);
                              done();
                          });
         });
 
         it('POST /users with duplicated username will return status 500', function (done) {
-            var user = {
-                userName: 'existingUserName'
-            };
-
             request(url)
                     .post('/users')
-                    .send(user)
+                    .send(new User({userName: 'existingUserName'}))
                     .end(function (err, res) {
                              res.status.should.eql(500);
                              done();
@@ -153,7 +149,7 @@ describe('CRUD /users', function() {
         });
     });
 
-    describe("PUT /users:id endpoint", function () {
+    describe("PUT /users:id", function () {
         var user = new User({userName: 'theUserName'});
 
         before(function (done) {
