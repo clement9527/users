@@ -2,9 +2,9 @@
 var mongoose = require('mongoose');
 var should = require('should');
 var request = require('supertest');
-var app  = require('../app');
-var config = require('../config/config-test');
-var User = require('../models/users');
+var app  = require('../../app');
+var config = require('../../config/config-test');
+var User = require('../../models/users');
 
 var port = 3001;
 mongoose.connect(config.db);
@@ -129,7 +129,6 @@ describe('CRUD /users', function() {
                     .delete('/users/' + user.id)
                     .end(function (err, res) {
                              res.status.should.eql(200);
-                             res.body.should.eql(1);
                              User.findById(user.id, function (err, result) {
                                  should.not.exist(result);
                                  done();
