@@ -10,16 +10,14 @@ var failed = function(err, res, next) {
 var auth = {
     authorized: function (req, res, next) {
         var secret = require('../app').get('secret');
-        var token = req.body.token || req.query.token || req.headers['x-access-token'];
+        var token = req.body.token || req.query.token || req.headers['authorization'];
         if (token) {
             jwt.verify(token, secret, function (err) {
                 if (err) {
                     return res.status(403).json({status: 403, error: 'Error: invalid authentication token.'});
-                } else {
-                    next();
                 }
+                next();
             });
-            next();
         } else {
             res.sendStatus(403);
         }
