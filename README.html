@@ -1,5 +1,43 @@
     <section class="suite">
-      <h1>CRUD /users</h1>
+      <h1>Authenticate</h1>
+      <dl>
+        <section class="suite">
+          <h1>POST /auth</h1>
+          <dl>
+            <dt>POST /auth with unregistered email and password will register the email, returning status 200 and authentication token</dt>
+            <dd><pre><code>request(url)
+        .post('/auth')
+        .send({email: 'test@email.com', password: 'password'})
+        .end(function(err, res) {
+                 res.status.should.eql(200);
+                 res.body.should.have.property('token');
+                 Admin.findOne({email: 'test@email.com'}, function(err, result){
+                     result.password.should.eql('password');
+                     done();
+                 });
+             });</code></pre></dd>
+            <dt>POST /auth with registered email but invalid password will return status 403</dt>
+            <dd><pre><code>request(url)
+        .post('/auth')
+        .send({email: existingAdmin.email, password: 'invalid_password'})
+        .end(function(err, res) {
+                 res.status.should.eql(403);
+                 done();
+             });</code></pre></dd>
+            <dt>POST /auth with registered email and valid password will return status 200 and authentication token</dt>
+            <dd><pre><code>request(url)
+        .post('/auth')
+        .send({email: existingAdmin.email, password: existingAdmin.password})
+        .end(function(err, res) {
+                 res.status.should.eql(200);
+                 done();
+             });</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>Manage Users</h1>
       <dl>
         <section class="suite">
           <h1>GET /users</h1>
@@ -7,32 +45,35 @@
             <dt>GET /users will return all users</dt>
             <dd><pre><code>//user1 and user2 are existing in database
 request(url)
-        .get('/users')
-        .end(function (err, res) {
-                 res.status.should.eql(200);
-                 res.body.should.have.length(2);
-                 res.body[0].should.have.property('userName', user1.userName);
-                 res.body[1].should.have.property('userName', user2.userName);
-                 done();
-             });</code></pre></dd>
+    .get('/users')
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(200);
+        res.body.should.have.length(2);
+        res.body[0].should.have.property('userName', user1.userName);
+        res.body[1].should.have.property('userName', user2.userName);
+        done();
+    });</code></pre></dd>
             <dt>GET /users:id with valid id will return status 200 and the user</dt>
             <dd><pre><code>//user1 and user2 are existing in database
 request(url)
-        .get('/users/' + user1.id)
-        .end(function (err, res) {
-                 res.status.should.eql(200);
-                 res.body.should.have.property('userName', 'theUserName1');
-                 done();
-             });</code></pre></dd>
+    .get('/users/' + user1.id)
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(200);
+        res.body.should.have.property('userName', 'theUserName1');
+        done();
+    });</code></pre></dd>
             <dt>GET /users:id with invalid id will return status 500</dt>
             <dd><pre><code>//user1 and user2 are existing in database
 request(url)
-        .get('/users/invalid_id')
-        .end(function (err, res) {
-                 res.status.should.eql(500);
-                 res.body.should.eql({});
-                 done();
-             });</code></pre></dd>
+    .get('/users/invalid_id')
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(500);
+        res.body.should.eql({});
+        done();
+    });</code></pre></dd>
           </dl>
         </section>
         <section class="suite">
@@ -41,35 +82,38 @@ request(url)
             <dt>POST /users with valid user will return status 200 and create that user</dt>
             <dd><pre><code>var user = new User({userName: 'theUserName', givenName: 'theGivenName', surName: 'theSurName'});
 request(url)
-        .post('/users')
-        .send(user)
-        .end(function (err, res) {
-                 res.status.should.eql(200);
-                 res.body.should.have.property('userName', user.userName);
-                 res.body.should.have.property('givenName', user.givenName);
-                 res.body.should.have.property('surName', user.surName);
-                 done();
-             });</code></pre></dd>
+    .post('/users')
+    .send(user)
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(200);
+        res.body.should.have.property('userName', user.userName);
+        res.body.should.have.property('givenName', user.givenName);
+        res.body.should.have.property('surName', user.surName);
+        done();
+    });</code></pre></dd>
             <dt>POST /users with duplicated username will return status 500</dt>
             <dd><pre><code>request(url)
-        .post('/users')
-        .send(new User({userName: 'existingUserName'}))
-        .end(function (err, res) {
-                 res.status.should.eql(500);
-                 done();
-             });</code></pre></dd>
+    .post('/users')
+    .send(new User({userName: 'existingUserName'}))
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(500);
+        done();
+    });</code></pre></dd>
             <dt>POST /users with required field missing will return status 500</dt>
             <dd><pre><code>var user = {
     givenName: 'theGivenName',
     surName: 'theSurName'
 };
 request(url)
-        .post('/users')
-        .send(user)
-        .end(function(err, res){
-                 res.status.should.eql(500);
-                 done();
-             });</code></pre></dd>
+    .post('/users')
+    .send(user)
+    .set('authorization', token)
+    .end(function(err, res){
+        res.status.should.eql(500);
+        done();
+    });</code></pre></dd>
           </dl>
         </section>
         <section class="suite">
@@ -77,22 +121,23 @@ request(url)
           <dl>
             <dt>DELETE /users:id with valid id will return status 200 and delete that user</dt>
             <dd><pre><code>request(url)
-        .delete('/users/' + user.id)
-        .end(function (err, res) {
-                 res.status.should.eql(200);
-                 res.body.should.eql(1);
-                 User.findById(user.id, function (err, result) {
-                     should.not.exist(result);
-                     done();
-                 });
-             });</code></pre></dd>
+    .delete('/users/' + user.id)
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(200);
+        User.findById(user.id, function (err, result) {
+            should.not.exist(result);
+            done();
+        });
+    });</code></pre></dd>
             <dt>DELETE /users:id with invalid id will return status 500</dt>
             <dd><pre><code>request(url)
-        .delete('/users/invalid_id')
-        .end(function (err, res) {
-                 res.status.should.eql(500);
-                 done();
-             });</code></pre></dd>
+    .delete('/users/invalid_id')
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(500);
+        done();
+    });</code></pre></dd>
           </dl>
         </section>
         <section class="suite">
@@ -101,24 +146,26 @@ request(url)
             <dt>PUT /users:id with different username will return status 200 and update the user</dt>
             <dd><pre><code>user.userName = 'anotherUserName';
 request(url)
-        .put('/users/' + user.id)
-        .send(user)
-        .end(function (err, res) {
-                 res.status.should.eql(200);
-                 User.findById(user.id, function (err, result) {
-                     result.should.have.property('userName', 'anotherUserName');
-                     done();
-                 });
-             });</code></pre></dd>
+    .put('/users/' + user.id)
+    .send(user)
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(200);
+        User.findById(user.id, function (err, result) {
+            result.should.have.property('userName', 'anotherUserName');
+            done();
+        });
+    });</code></pre></dd>
             <dt>PUT /users:id with invalid id will return status 500</dt>
             <dd><pre><code>user.userName = 'anotherUserName';
 request(url)
-        .put('/users/invalid_id')
-        .send(user)
-        .end(function (err, res) {
-                 res.status.should.eql(500);
-                 done();
-             });</code></pre></dd>
+    .put('/users/invalid_id')
+    .send(user)
+    .set('authorization', token)
+    .end(function (err, res) {
+        res.status.should.eql(500);
+        done();
+    });</code></pre></dd>
           </dl>
         </section>
       </dl>

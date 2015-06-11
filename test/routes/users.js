@@ -72,7 +72,7 @@ describe('Manage Users', function() {
                 });
         });
 
-        it('GET /users:id with invalid id will return status 500', function (done) {
+        it('GET /users/:id with invalid id will return status 500', function (done) {
             //user1 and user2 are existing in database
             request(url)
                 .get('/users/invalid_id')
@@ -139,7 +139,7 @@ describe('Manage Users', function() {
         });
     });
 
-    describe("DELETE /users:id", function () {
+    describe("DELETE /users/:id", function () {
         var user = new User({userName: 'theUserName'});
 
         before(function (done) {
@@ -150,7 +150,7 @@ describe('Manage Users', function() {
             });
         });
 
-        it("DELETE /users:id with valid id will return status 200 and delete that user", function (done) {
+        it("DELETE /users/:id with valid id will return status 200 and delete that user", function (done) {
             request(url)
                 .delete('/users/' + user.id)
                 .set('authorization', token)
@@ -164,7 +164,7 @@ describe('Manage Users', function() {
 
         });
 
-        it("DELETE /users:id with invalid id will return status 500", function (done) {
+        it("DELETE /users/:id with invalid id will return status 500", function (done) {
             request(url)
                 .delete('/users/invalid_id')
                 .set('authorization', token)
@@ -176,7 +176,7 @@ describe('Manage Users', function() {
         });
     });
 
-    describe("PUT /users:id", function () {
+    describe("PUT /users/:id", function () {
         var user = new User({userName: 'theUserName'});
 
         before(function (done) {
@@ -187,7 +187,7 @@ describe('Manage Users', function() {
             });
         });
 
-        it("PUT /users:id with different username will return status 200 and update the user", function (done) {
+        it("PUT /users/:id with different username will return status 200 and update the user", function (done) {
             user.userName = 'anotherUserName';
             request(url)
                 .put('/users/' + user.id)
@@ -203,7 +203,7 @@ describe('Manage Users', function() {
 
         });
 
-        it("PUT /users:id with invalid id will return status 500", function (done) {
+        it("PUT /users/:id with invalid id will return status 500", function (done) {
             user.userName = 'anotherUserName';
             request(url)
                 .put('/users/invalid_id')
