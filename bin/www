@@ -21,7 +21,8 @@ debug("Successfully connected to mongoDB. Starting web server...");
  */
 var port = normalizePort(process.env.PORT || config.port);
 app.set('port', port);
-app.set('secret', config.secret); // secret variable
+app.set('secret', config.secret || 'default secret'); // secret variable
+app.set('timeoutInMin', config.timeoutInMin || 10);
 
 /**
  * Create HTTP server.

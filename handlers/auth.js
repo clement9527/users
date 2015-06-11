@@ -14,7 +14,7 @@ var auth = {
         if (token) {
             jwt.verify(token, secret, function (err) {
                 if (err) {
-                    return res.status(403).json({status: 403, error: 'Error: invalid authentication token.'});
+                    return res.status(401).json({status: 403, error: 'Error: invalid authentication token.'});
                 }
                 next();
             });
@@ -25,6 +25,7 @@ var auth = {
 
     authenticate: function (req, res) {
         var secret = require('../app').get('secret');
+        var timeoutInMin = require('../app').get('timeoutInMin');
         var target = new Admin({email: req.body.email, password: req.body.password});
         Admin.findOne({email: target.email}, function (err, found) {
             if (err) {
@@ -33,7 +34,7 @@ var auth = {
 
             if (found) {
                 if (found.password === target.password) {
-                    var token = jwt.sign(found, secret, {expiresInMinutes: 10});
+                    var token = jwt.sign(found, secret, {expiresInMinutes: timeoutInMin});
                     res.status(200).json({status: 200, token: token});
                 } else {
                     res.status(403).json({status: 403, error: 'invalid email/password'});

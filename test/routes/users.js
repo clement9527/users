@@ -7,13 +7,12 @@ var config = require('../../configs/config-test');
 var User = require('../../models/users');
 var Admin = require('../../models/admin');
 
-var port = 3001;
 var connection = mongoose.createConnection(config.db);
 app.listen(config.port);
 app.set('secret', config.secret);
 var url = 'http://localhost:' + config.port;
 
-describe('CRUD /users', function() {
+describe('Manage Users', function() {
     var admin = new Admin({email: 'test@email.com', password: 'thePassword'});
     var token;
     before(function (done) {
